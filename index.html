@@ -73,6 +73,9 @@
   button.danger{color:#9C2B2B;}
   button.danger:hover{background:#FDE2E2;border-color:#9C2B2B;}
   button.iconx{padding:2px 8px;font-size:14px;line-height:1;border-radius:999px;}
+  button:disabled{opacity:.45;cursor:not-allowed;}
+  button:disabled:hover{background:#fff;border-color:var(--line);}
+  button.primary:disabled:hover{background:var(--orange-600);}
 
   .tablewrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--line);background:#fff;padding:1rem;}
 
@@ -138,6 +141,64 @@
   .addform input[type="number"]{width:90px;border:1px solid var(--line);border-radius:7px;padding:.4rem .6rem;font-size:12.5px;font-family:inherit;background:#fff;}
 
   footer.note{font-size:12.5px;color:var(--ink-mute);margin-top:3rem;line-height:1.7;border-top:1px solid var(--line);padding-top:1.3rem;}
+
+  .syncbar{background:var(--orange-50);border:1px solid var(--orange-100);border-radius:var(--radius);padding:.9rem 1.1rem;}
+  .syncbar-row{display:flex;flex-wrap:wrap;gap:.6rem 1rem;align-items:center;}
+  .syncbar-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--orange-700);flex:0 0 auto;}
+  .syncbar-fields{display:flex;flex-wrap:wrap;gap:.5rem;flex:1 1 380px;}
+  .syncbar-fields input{border:1px solid var(--line);border-radius:7px;padding:.45rem .6rem;font-size:12.5px;font-family:inherit;background:#fff;color:var(--ink);flex:1 1 150px;min-width:110px;}
+  .syncbar-fields input:focus{outline:none;border-color:var(--orange-500);box-shadow:0 0 0 2px var(--orange-100);}
+  .syncbar-actions{display:flex;gap:.5rem;flex:0 0 auto;}
+
+  .settings-toggle{display:inline-flex;align-items:center;gap:.4rem;background:#fff;border:1px solid var(--line);border-radius:9px;padding:.55rem .9rem;font-size:13px;font-weight:600;color:var(--orange-700);cursor:pointer;font-family:inherit;}
+  .settings-toggle:hover{background:var(--orange-50);border-color:var(--orange-500);}
+  .settings-toggle .chev{transition:transform .15s ease;display:inline-block;}
+  .settings-toggle.open .chev{transform:rotate(90deg);}
+  #settingsBody{margin-top:1rem;}
+
+  .headerlink{position:absolute;top:1.1rem;right:24px;font-size:12.5px;color:#fff;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:.4rem .85rem;text-decoration:none;font-weight:600;}
+  .headerlink:hover{background:rgba(255,255,255,.26);}
+  header.hero{position:relative;}
+  .scrollhint{display:none;font-size:11.5px;color:var(--ink-mute);margin:0 0 .4rem;}
+
+  @media (max-width:640px){
+    body{padding-bottom:3rem;}
+    .wrap{padding:0 14px;}
+    header.hero{padding:1.6rem 0 2.8rem;margin-bottom:-2.4rem;}
+    .headerlink{position:static;display:inline-block;margin-top:.6rem;}
+    header.hero .wrap{gap:.25rem;}
+    h1{font-size:clamp(21px,7vw,28px);}
+    .subtitle{font-size:13px;}
+    .metrics{grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:10px;margin-bottom:1.6rem;}
+    .metric{padding:.85rem 1rem;}
+    .metric .value{font-size:18px;}
+    .metric .label{font-size:10.5px;}
+    section{margin-top:1.8rem;}
+    h2{font-size:17px;}
+    .btnrow{gap:.4rem;margin-bottom:.7rem;}
+    button{padding:.55rem .75rem;font-size:12.5px;}
+    .monthtab{padding:.5rem .85rem;font-size:12.5px;}
+    .cfgbox{padding:.9rem 1rem;}
+    .syncbar{padding:.8rem .9rem;}
+    .syncbar-fields input{flex:1 1 100%;}
+    .syncbar-actions{width:100%;}
+    .syncbar-actions button{flex:1 1 auto;}
+    .tablewrap{padding:.7rem;}
+    table{font-size:11.5px;}
+    thead th{padding:.45rem .35rem;font-size:10.5px;}
+    tbody td, tfoot td{padding:.4rem .35rem;}
+    .target-input,.potensi-input{width:92px;font-size:11.5px;}
+    .catlabel-input{width:120px;font-size:11.5px;}
+    .pct-input{width:44px;font-size:11.5px;}
+    .group-select{font-size:11px;padding:4px 4px;}
+    .scrollhint{display:block;}
+    .actionrow{gap:6px;}
+    .pic-input,.status-select,.actionrow textarea{flex:1 1 100%;}
+    .addactionrow{flex-direction:column;align-items:stretch;}
+    .chart-card{padding:.9rem;}
+    .grid2{gap:12px;}
+    footer.note{font-size:11.5px;}
+  }
 </style>
 </head>
 <body>
@@ -146,7 +207,8 @@
   <div class="wrap">
     <div class="eyebrow">RZ Palembang &middot; Aplikasi internal</div>
     <h1>Sales Forecasting <span id="yearTitle"></span></h1>
-    <div class="subtitle">Sebaran potensi, target, dan strategi fundraising bulanan. Kategori, kelompok, daftar bulan, dan tahun semuanya bisa diedit/ditambah lewat menu Pengaturan di bawah, supaya aplikasi ini tetap terpakai untuk periode-periode berikutnya.</div>
+    <div class="subtitle">Sebaran potensi, target, dan strategi fundraising bulanan.</div>
+    <a href="#settingsSection" class="headerlink" onclick="openSettings()">&#9881; Pengaturan</a>
   </div>
 </header>
 
@@ -162,66 +224,39 @@
   </section>
 
   <section>
-    <h2>0. Pengaturan aplikasi</h2>
-    <div class="section-note">Sesuaikan tahun berjalan, daftar bulan yang dipantau, dan daftar kelompok kategori di sini. Kategori sendiri (Zakat, Wakaf, dst) diedit langsung di tabel Section 1 &mdash; bisa tambah/hapus/ganti nama/ganti kelompok per baris.</div>
-
-    <div class="cfgbox">
-      <h3>Tahun</h3>
-      <div class="addform">
-        <input type="number" id="yearInput" value="2026">
-        <button type="button" class="small primary" onclick="applyYear()">Terapkan tahun</button>
+    <div class="syncbar">
+      <div class="syncbar-row">
+        <div class="syncbar-title">Sinkronisasi Google Sheet</div>
+        <div class="syncbar-fields">
+          <input type="text" id="sheetUrlInput" placeholder="URL Web App (.../exec)">
+          <input type="text" id="sheetTokenInput" placeholder="Token akses">
+          <input type="text" id="userNameInput" placeholder="Nama Anda">
+        </div>
+        <div class="syncbar-actions">
+          <button type="button" class="primary" onclick="saveToSheet()">Simpan ke Sheet</button>
+          <button type="button" onclick="loadFromSheet()">Muat dari Sheet</button>
+        </div>
       </div>
-    </div>
-
-    <div class="cfgbox">
-      <h3>Mulai periode baru</h3>
-      <div class="section-note" style="margin-bottom:.6rem;">Untuk pindah ke semester/tahun berikutnya tanpa mengetik ulang semua kategori. Realisasi, catatan strategi, dan daftar aksi fundraising di setiap bulan akan dikosongkan. Daftar <b>kategori, kelompok, target, potensi, dan bobot bulanan tetap dipertahankan</b> sebagai titik awal — sesuaikan lagi setelahnya. Ganti dulu tahun/daftar bulan di atas kalau perlu, baru klik tombol ini.</div>
-      <button type="button" class="danger" onclick="startNewPeriod()">Kosongkan realisasi & strategi (mulai periode baru)</button>
-    </div>
-
-    <div class="cfgbox">
-      <h3>Sinkronisasi Google Sheet</h3>
-      <div class="section-note" style="margin-bottom:.6rem;">Tempel URL Web App Apps Script (langkah setup lengkap ada di file <b>PANDUAN_SETUP.md</b> yang saya sertakan terpisah). Setelah tersambung, <b>Simpan ke Sheet</b> mengunggah seluruh isian saat ini ke Google Sheet; <b>Muat dari Sheet</b> menarik data terakhir yang tersimpan di sana &mdash; jadi bisa dibuka dari perangkat/komputer lain dan tetap sinkron, dan datanya tidak hilang saat tab ditutup.</div>
-      <div class="addform">
-        <input type="text" id="sheetUrlInput" placeholder="https://script.google.com/macros/s/XXXXXXXX/exec" style="width:100%;max-width:480px;">
-      </div>
-      <div class="btnrow" style="margin-top:.6rem;">
-        <button type="button" class="primary" onclick="saveToSheet()">Simpan ke Sheet</button>
-        <button type="button" onclick="loadFromSheet()">Muat dari Sheet</button>
-      </div>
-      <div id="sheetStatus" class="section-note" style="margin:0;"></div>
-    </div>
-
-    <div class="cfgbox">
-      <h3>Bulan yang dipantau</h3>
-      <div class="chiprow" id="monthChips"></div>
-      <div class="addform">
-        <input type="text" id="newMonthShort" placeholder="Singkatan (mis. Jan)" style="width:150px;">
-        <input type="text" id="newMonthFull" placeholder="Nama penuh (mis. Januari)" style="width:170px;">
-        <button type="button" class="small" onclick="addMonth()">+ Tambah bulan</button>
-      </div>
-    </div>
-
-    <div class="cfgbox">
-      <h3>Kelompok kategori</h3>
-      <div class="chiprow" id="groupChips"></div>
-      <div class="addform">
-        <input type="text" id="newGroupLabel" placeholder="Nama kelompok baru" style="width:190px;">
-        <input type="color" id="newGroupColor" value="#2C6E9E">
-        <button type="button" class="small" onclick="addGroup()">+ Tambah kelompok</button>
-      </div>
+      <div id="sheetStatus" class="section-note" style="margin:.4rem 0 0;"></div>
+      <div id="sheetMeta" class="section-note" style="margin:.15rem 0 0;font-weight:600;"></div>
     </div>
   </section>
+
 
   <section>
     <h2>1. Potensi, target, dan bobot bulanan</h2>
     <div class="section-note" id="section1Note"></div>
     <div class="btnrow">
+      <button type="button" id="applyChangesBtn" class="primary" onclick="applyInputChanges()" disabled>&#10003; Terapkan Perubahan</button>
       <button onclick="addCategory()">+ Tambah kategori</button>
       <button onclick="flattenAll()">Ratakan semua bulan</button>
       <button onclick="resetDefaults()">Reset ke default (Jul&ndash;Des 2026)</button>
       <button class="primary" onclick="downloadCSV()">Unduh CSV forecast</button>
       <button onclick="toggleBackupBox()">Backup / pulihkan data</button>
+    </div>
+    <div id="dirtyBanner" class="flag" style="display:none;">
+      <span>&#9998;</span>
+      <div>Ada perubahan pada <b>Potensi / Target / Bobot bulanan</b> yang belum diterapkan. Grafik, forecast bulanan, dan file CSV/Sheet masih memakai data sebelumnya sampai Anda klik <b>Terapkan Perubahan</b>.</div>
     </div>
     <div id="backupBox" class="strategy-box" style="display:none;">
       <label>Backup & pemulihan data (manual, tanpa penyimpanan browser)</label>
@@ -232,6 +267,7 @@
       </div>
       <textarea id="backupText" style="min-height:110px;font-size:11.5px;"></textarea>
     </div>
+    <div class="scrollhint">&#8592; Geser tabel ke samping untuk melihat kolom lainnya &#8594;</div>
     <div class="tablewrap">
       <table id="inputTable">
         <thead><tr id="inputHeadRow"></tr></thead>
@@ -251,6 +287,7 @@
   <section>
     <h2>3. Realisasi vs target bulanan</h2>
     <div class="section-note">Isi nominal yang benar-benar sudah cair/diterima per kategori per bulan. Persentase capaian dihitung otomatis dan diberi warna: merah &lt;70%, oranye 70&ndash;99%, hijau &ge;100%.</div>
+    <div class="scrollhint">&#8592; Geser tabel ke samping untuk melihat kolom lainnya &#8594;</div>
     <div class="tablewrap">
       <table id="realisasiTable">
         <thead><tr id="realisasiHeadRow"></tr></thead>
@@ -263,6 +300,7 @@
   <section>
     <h2>4. Forecast bulanan (Rp)</h2>
     <div class="section-note">Nilai di bawah dihitung otomatis dari Target &times; bobot bulan, dan berubah begitu tabel Section 1 diedit.</div>
+    <div class="scrollhint">&#8592; Geser tabel ke samping untuk melihat kolom lainnya &#8594;</div>
     <div class="tablewrap">
       <table id="outputTable">
         <thead><tr id="outputHeadRow"></tr></thead>
@@ -286,12 +324,64 @@
     </div>
   </section>
 
+  <section id="settingsSection">
+    <button type="button" class="settings-toggle" id="settingsToggleBtn" onclick="toggleSettings()">
+      <span class="chev">&#9656;</span> Pengaturan aplikasi (tahun, rasio capaian, bulan, kelompok, mulai periode baru)
+    </button>
+    <div id="settingsBody" style="display:none;">
+      <div class="section-note" style="margin:.6rem 0 1rem;">Kategori sendiri (Zakat, Wakaf, dst) diedit langsung di tabel Section 1 &mdash; bisa tambah/hapus/ganti nama/ganti kelompok per baris. Pengaturan di bawah ini jarang perlu diubah, karena itu disembunyikan secara default.</div>
+
+      <div class="cfgbox">
+        <h3>Tahun</h3>
+        <div class="addform">
+          <input type="number" id="yearInput" value="2026">
+          <button type="button" class="small primary" onclick="applyYear()">Terapkan tahun</button>
+        </div>
+      </div>
+
+      <div class="cfgbox">
+        <h3>Rasio capaian (untuk hitung Potensi otomatis)</h3>
+        <div class="section-note" style="margin-bottom:.6rem;">Kategori kelompok <b>Reguler existing</b> yang belum ditandai "asumsi" dihitung Potensi = Target &divide; rasio ini. Nilai default berasal dari rata-rata capaian historis &mdash; sesuaikan tiap semester/tahun kalau performanya berubah, tanpa perlu edit kode.</div>
+        <div class="addform">
+          <input type="number" step="0.0001" id="capaianInput" value="1.5111" style="width:120px;">
+          <button type="button" class="small primary" onclick="applyCapaian()">Terapkan rasio</button>
+        </div>
+      </div>
+
+      <div class="cfgbox">
+        <h3>Mulai periode baru</h3>
+        <div class="section-note" style="margin-bottom:.6rem;">Untuk pindah ke semester/tahun berikutnya tanpa mengetik ulang semua kategori. Realisasi, catatan strategi, dan daftar aksi fundraising di setiap bulan akan dikosongkan. Daftar <b>kategori, kelompok, target, potensi, dan bobot bulanan tetap dipertahankan</b> sebagai titik awal — sesuaikan lagi setelahnya. Ganti dulu tahun/daftar bulan di atas kalau perlu, baru klik tombol ini.</div>
+        <button type="button" class="danger" onclick="startNewPeriod()">Kosongkan realisasi & strategi (mulai periode baru)</button>
+      </div>
+
+      <div class="cfgbox">
+        <h3>Bulan yang dipantau</h3>
+        <div class="chiprow" id="monthChips"></div>
+        <div class="addform">
+          <input type="text" id="newMonthShort" placeholder="Singkatan (mis. Jan)" style="width:150px;">
+          <input type="text" id="newMonthFull" placeholder="Nama penuh (mis. Januari)" style="width:170px;">
+          <button type="button" class="small" onclick="addMonth()">+ Tambah bulan</button>
+        </div>
+      </div>
+
+      <div class="cfgbox">
+        <h3>Kelompok kategori</h3>
+        <div class="chiprow" id="groupChips"></div>
+        <div class="addform">
+          <input type="text" id="newGroupLabel" placeholder="Nama kelompok baru" style="width:190px;">
+          <input type="color" id="newGroupColor" value="#2C6E9E">
+          <button type="button" class="small" onclick="addGroup()">+ Tambah kelompok</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <footer class="note" id="footerNote"></footer>
 
 </div>
 
 <script>
-const CAPAIAN = 1.5110728487904983;
+let CAPAIAN = 1.5110728487904983;
 let YEAR = 2026;
 let monthCounter = 0;
 function newMonthKey(){ return 'm' + (monthCounter++); }
@@ -336,6 +426,7 @@ function makeDefaultData(){
     w:{...r.w},
     potensi: r.group==='reguler' ? Math.round(r.target/CAPAIAN) : r.target,
     potensiAsumsi: r.group!=='reguler',
+    potensiManual: false,
     realisasi: Object.fromEntries(MONTHS.map(m=>[m.key,0])),
   }));
 }
@@ -407,11 +498,11 @@ let catCounter = data.length;
 
 const rupiah = n => 'Rp' + Math.round(n).toLocaleString('id-ID');
 const ACTION_TYPES = ['Proposal','Follow-up WA','Galang Dana','Event'];
-const GROUP_PALETTE = ['#2C6E9E','#3E7A3E','#7A4E9E','#C24E0A','#8A5A2E','#9C2B2B','#4A3216','#B08C3C'];
 
 function groupOf(id){ return GROUPS.find(g=>g.id===id) || GROUPS[0]; }
 
 function resetDefaults(){
+  if(!guardDirty()) return;
   MONTHS = [
     {key:'m0', short:'Jul', full:'Juli'},{key:'m1', short:'Ags', full:'Agustus'},
     {key:'m2', short:'Sep', full:'September'},{key:'m3', short:'Okt', full:'Oktober'},
@@ -426,16 +517,20 @@ function resetDefaults(){
   actions = makeDefaultActions();
   activeMonth = MONTHS[0].key;
   document.getElementById('yearInput').value = YEAR;
+  clearDirty();
   render();
 }
 
 function flattenAll(){
+  if(!guardDirty('Ada perubahan Potensi/Target/Bobot yang belum diterapkan akan hilang jika "Ratakan semua bulan" dijalankan sekarang. Lanjutkan?')) return;
   const n = MONTHS.length;
   data.forEach(row => { MONTHS.forEach((m,i)=>{ row.w[m.key] = i < n-1 ? Math.floor(10000/n)/10000 : (1 - Math.floor(10000/n)/10000*(n-1)); }); });
-  renderOutputsAndCharts(); buildMonthPanels(); buildRealisasi();
+  clearDirty();
+  render();
 }
 
 function startNewPeriod(){
+  if(!guardDirty('Ada perubahan Potensi/Target/Bobot yang belum diterapkan akan hilang jika periode baru dimulai sekarang. Lanjutkan?')) return;
   if(!confirm('Mulai periode baru?\n\nRealisasi, catatan strategi umum, dan seluruh daftar aksi fundraising untuk semua bulan akan DIKOSONGKAN.\nKategori, kelompok, target, potensi, dan bobot bulanan akan TETAP dipertahankan sebagai titik awal.\n\nLanjutkan?')) return;
   data.forEach(row => {
     MONTHS.forEach(m => { row.realisasi[m.key] = 0; });
@@ -444,6 +539,7 @@ function startNewPeriod(){
   MONTHS.forEach(m => { newStrategy[m.key] = ''; newActions[m.key] = []; });
   strategy = newStrategy;
   actions = newActions;
+  clearDirty();
   render();
   alert('Periode baru dimulai. Realisasi, strategi, dan daftar aksi sudah kosong — isi ulang sesuai rencana periode ini. Kategori, kelompok, target, potensi, dan bobot bulanan tetap seperti sebelumnya, silakan sesuaikan bila perlu.');
 }
@@ -452,6 +548,31 @@ function startNewPeriod(){
 function applyYear(){
   YEAR = parseInt(document.getElementById('yearInput').value) || YEAR;
   renderHeaderLabels();
+}
+function toggleSettings(){
+  const body = document.getElementById('settingsBody');
+  const btn = document.getElementById('settingsToggleBtn');
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  btn.classList.toggle('open', !isOpen);
+}
+function openSettings(){
+  const body = document.getElementById('settingsBody');
+  const btn = document.getElementById('settingsToggleBtn');
+  body.style.display = 'block';
+  btn.classList.add('open');
+}
+function applyCapaian(){
+  if(!guardDirty('Ada perubahan Potensi/Target/Bobot yang belum diterapkan akan hilang jika rasio capaian diterapkan sekarang. Lanjutkan?')) return;
+  const v = parseFloat(document.getElementById('capaianInput').value);
+  if(!v || v<=0){ alert('Isi rasio capaian dengan angka positif (mis. 1.5111).'); return; }
+  CAPAIAN = v;
+  // Hitung ulang Potensi otomatis untuk kategori "reguler" yang belum pernah diedit manual.
+  data.forEach(row=>{
+    if(row.group==='reguler' && !row.potensiManual){ row.potensi = Math.round(row.target/CAPAIAN); }
+  });
+  clearDirty();
+  render();
 }
 function renderHeaderLabels(){
   document.getElementById('yearTitle').textContent = YEAR;
@@ -466,6 +587,7 @@ function buildMonthChips(){
   box.querySelectorAll('[data-rm-month]').forEach(btn=>{
     btn.addEventListener('click', e=>{
       if(MONTHS.length <= 1){ alert('Minimal harus ada 1 bulan.'); return; }
+      if(!guardDirty('Ada perubahan Potensi/Target/Bobot yang belum diterapkan akan hilang jika bulan ini dihapus sekarang. Lanjutkan?')) return;
       const key = e.target.dataset.rmMonth;
       if(!confirm('Hapus bulan ini? Bobot, realisasi, strategi, dan daftar aksi untuk bulan ini akan ikut terhapus.')) return;
       MONTHS = MONTHS.filter(m=>m.key!==key);
@@ -473,11 +595,13 @@ function buildMonthChips(){
       delete strategy[key];
       delete actions[key];
       if(activeMonth === key) activeMonth = MONTHS[0].key;
+      clearDirty();
       render();
     });
   });
 }
 function addMonth(){
+  if(!guardDirty('Ada perubahan Potensi/Target/Bobot yang belum diterapkan akan hilang jika bulan baru ditambahkan sekarang. Lanjutkan?')) return;
   const shortEl = document.getElementById('newMonthShort');
   const fullEl = document.getElementById('newMonthFull');
   const short = shortEl.value.trim();
@@ -489,6 +613,7 @@ function addMonth(){
   strategy[key] = '';
   actions[key] = [];
   shortEl.value = ''; fullEl.value = '';
+  clearDirty();
   render();
 }
 
@@ -504,12 +629,15 @@ function buildGroupChips(){
       const id = e.target.dataset.rmGroup;
       const used = data.some(r=>r.group===id);
       if(used){ alert('Kelompok ini masih dipakai oleh kategori. Pindahkan dulu kategori tersebut ke kelompok lain sebelum menghapus.'); return; }
+      if(!guardDirty()) return;
       GROUPS = GROUPS.filter(g=>g.id!==id);
+      clearDirty();
       render();
     });
   });
 }
 function addGroup(){
+  if(!guardDirty()) return;
   const labelEl = document.getElementById('newGroupLabel');
   const colorEl = document.getElementById('newGroupColor');
   const label = labelEl.value.trim();
@@ -517,17 +645,75 @@ function addGroup(){
   const id = 'grp' + Date.now();
   GROUPS.push({id, label, color: colorEl.value});
   labelEl.value = '';
+  clearDirty();
   render();
 }
 function addCategory(){
+  if(!guardDirty()) return;
   const key = 'cat' + (catCounter++);
   const w = {}; const r = {};
   MONTHS.forEach(m=>{ w[m.key]=0; r[m.key]=0; });
-  data.push({key, label:'Kategori baru', group: GROUPS[0].id, target:0, potensi:0, potensiAsumsi:true, w, realisasi:r});
+  data.push({key, label:'Kategori baru', group: GROUPS[0].id, target:0, potensi:0, potensiAsumsi:true, potensiManual:false, w, realisasi:r});
+  clearDirty();
   render();
 }
 
 // ---------- Section 1: input table ----------
+// ---------- Perubahan tertunda (Potensi/Target/Bobot) — perlu klik "Terapkan Perubahan" ----------
+let dirty = false;
+function markDirty(){
+  dirty = true;
+  const banner = document.getElementById('dirtyBanner');
+  const btn = document.getElementById('applyChangesBtn');
+  if(banner) banner.style.display = 'flex';
+  if(btn) btn.disabled = false;
+}
+function clearDirty(){
+  dirty = false;
+  const banner = document.getElementById('dirtyBanner');
+  const btn = document.getElementById('applyChangesBtn');
+  if(banner) banner.style.display = 'none';
+  if(btn) btn.disabled = true;
+}
+function guardDirty(msg){
+  if(!dirty) return true;
+  return confirm(msg || 'Ada perubahan Potensi/Target/Bobot yang belum diterapkan (klik "Terapkan Perubahan" dulu kalau tidak mau hilang). Lanjutkan tanpa menerapkannya?');
+}
+function applyInputChanges(){
+  const tbody = document.getElementById('inputBody');
+  tbody.querySelectorAll('tr').forEach(tr=>{
+    const keyEl = tr.querySelector('[data-key]');
+    if(!keyEl) return;
+    const row = data.find(r=>r.key===keyEl.dataset.key);
+    if(!row) return;
+
+    const targetInput = tr.querySelector('input[data-type="target"]');
+    if(targetInput){
+      let tv = parseFloat(targetInput.value.replace(/[^0-9.-]/g,'')); if(isNaN(tv)) tv = 0;
+      row.target = tv;
+    }
+
+    const potInput = tr.querySelector('input[data-type="potensi"]');
+    if(potInput){
+      let pv = parseFloat(potInput.value.replace(/[^0-9.-]/g,'')); if(isNaN(pv)) pv = 0;
+      if(potInput.dataset.manual === 'true'){
+        row.potensi = pv; row.potensiManual = true; row.potensiAsumsi = false;
+      } else if(row.group === 'reguler'){
+        row.potensi = Math.round(row.target/CAPAIAN);
+      } else {
+        row.potensi = pv;
+      }
+    }
+
+    tr.querySelectorAll('input[data-type="w"]').forEach(winp=>{
+      let wv = parseFloat(winp.value); if(isNaN(wv)) wv = 0;
+      row.w[winp.dataset.mkey] = wv/100;
+    });
+  });
+  clearDirty();
+  render();
+}
+
 function buildInputRows(){
   const headRow = document.getElementById('inputHeadRow');
   let headHtml = '<th class="lefth">Kategori</th><th class="lefth">Kelompok</th><th>Potensi (Rp)</th><th>Target (Rp)</th>';
@@ -542,7 +728,7 @@ function buildInputRows(){
     const tr = document.createElement('tr');
     let cells = `<td class="leftc" style="border-left:3px solid ${g.color};padding-left:9px;"><input class="catlabel-input" type="text" value="${row.label}" data-key="${row.key}" data-type="label"></td>`;
     cells += `<td class="leftc"><select class="group-select" data-key="${row.key}" data-type="group">${GROUPS.map(gg=>`<option value="${gg.id}" ${gg.id===row.group?'selected':''}>${gg.label}</option>`).join('')}</select></td>`;
-    cells += `<td><input class="potensi-input" type="text" value="${Math.round(row.potensi).toLocaleString('id-ID')}" data-key="${row.key}" data-type="potensi">${row.potensiAsumsi?'<span class="asumsi-tag" title="Belum ada histori realisasi — angka ini asumsi awal, sesuaikan manual berdasar prospek riil.">asumsi</span>':''}</td>`;
+    cells += `<td><input class="potensi-input" type="text" value="${Math.round(row.potensi).toLocaleString('id-ID')}" data-key="${row.key}" data-type="potensi" data-manual="${row.potensiManual?'true':'false'}">${row.potensiAsumsi?'<span class="asumsi-tag" title="Belum ada histori realisasi — angka ini asumsi awal, sesuaikan manual berdasar prospek riil.">asumsi</span>':''}</td>`;
     cells += `<td><input class="target-input" type="text" value="${Math.round(row.target).toLocaleString('id-ID')}" data-key="${row.key}" data-type="target"></td>`;
     MONTHS.forEach(m=>{
       cells += `<td><input class="pct-input" type="number" step="0.1" value="${((row.w[m.key]||0)*100).toFixed(1)}" data-key="${row.key}" data-mkey="${m.key}" data-type="w"></td>`;
@@ -567,44 +753,44 @@ function buildInputRows(){
   });
   tbody.querySelectorAll('select[data-type="group"]').forEach(sel=>{
     sel.addEventListener('change', e=>{
+      if(dirty && !confirm('Ada perubahan Potensi/Target/Bobot yang belum diterapkan akan hilang jika kelompok kategori ini diganti sekarang. Lanjutkan?')){
+        e.target.value = data.find(r=>r.key===e.target.dataset.key).group; // batalkan pilihan
+        return;
+      }
       data.find(r=>r.key===e.target.dataset.key).group = e.target.value;
+      clearDirty();
       render();
     });
   });
   tbody.querySelectorAll('input[data-type="w"]').forEach(inp=>{
     inp.addEventListener('input', e=>{
-      const key = e.target.dataset.key, mkey = e.target.dataset.mkey;
-      let v = parseFloat(e.target.value); if(isNaN(v)) v = 0;
-      const row = data.find(r=>r.key===key);
-      row.w[mkey] = v/100;
-      const sum = MONTHS.reduce((a,m)=>a+(row.w[m.key]||0),0);
+      // Preview Total% baris dari nilai yang sedang diketik (tanpa mengubah data sampai disubmit).
+      const key = e.target.dataset.key;
+      const tr = e.target.closest('tr');
+      let sum = 0;
+      tr.querySelectorAll('input[data-type="w"]').forEach(w=>{ const v = parseFloat(w.value); if(!isNaN(v)) sum += v/100; });
       const badge = document.querySelector(`[data-sum-key="${key}"]`);
       badge.textContent = (sum*100).toFixed(1)+'%';
       badge.className = 'rowsum' + (Math.abs(sum-1)>0.005 ? ' warn' : '');
-      renderOutputsAndCharts(); buildMonthPanels(); buildRealisasi();
+      markDirty();
     });
   });
   tbody.querySelectorAll('input[data-type="target"]').forEach(inp=>{
-    inp.addEventListener('input', e=>{
-      const row = data.find(r=>r.key===e.target.dataset.key);
-      let v = parseFloat(e.target.value.replace(/[^0-9.-]/g,'')); if(isNaN(v)) v = 0;
-      row.target = v;
-      renderOutputsAndCharts(); buildMonthPanels(); buildRealisasi(); buildInputTotalsOnly();
-    });
+    inp.addEventListener('input', ()=> markDirty());
   });
   tbody.querySelectorAll('input[data-type="potensi"]').forEach(inp=>{
     inp.addEventListener('input', e=>{
-      const row = data.find(r=>r.key===e.target.dataset.key);
-      let v = parseFloat(e.target.value.replace(/[^0-9.-]/g,'')); if(isNaN(v)) v = 0;
-      row.potensi = v; row.potensiAsumsi = false;
-      buildMonthPanels(); buildInputTotalsOnly();
+      e.target.dataset.manual = 'true'; // tandai sudah diedit manual, dipakai saat Terapkan Perubahan
+      markDirty();
     });
   });
   tbody.querySelectorAll('[data-del-key]').forEach(btn=>{
     btn.addEventListener('click', e=>{
       if(data.length<=1){ alert('Minimal harus ada 1 kategori.'); return; }
+      if(!guardDirty('Ada perubahan Potensi/Target/Bobot yang belum diterapkan akan hilang jika kategori ini dihapus sekarang. Lanjutkan?')) return;
       if(!confirm('Hapus kategori ini beserta seluruh data terkait (bobot, realisasi)?')) return;
       data = data.filter(r=>r.key!==e.target.dataset.delKey);
+      clearDirty();
       render();
     });
   });
@@ -708,7 +894,8 @@ function buildMonthPanels(){
       </div>
       ${metricsHtml}
       <div class="subhead">Rincian potensi & target per kategori</div>
-      <div class="tablewrap">
+      <div class="scrollhint">&#8592; Geser tabel ke samping untuk melihat kolom lainnya &#8594;</div>
+    <div class="tablewrap">
         <table>
           <thead><tr><th class="lefth">Kategori</th><th class="lefth">Kelompok</th><th>Potensi bulan ini</th><th>Target bulan ini</th><th>Bobot</th></tr></thead>
           <tbody>${tableRows}</tbody>
@@ -863,14 +1050,49 @@ function updateMetricCards(grandTotal, monthTotals){
   `).join('');
 }
 
+// Mengubah warna hex jadi lebih terang/gelap (t: -1..1) supaya kategori dalam satu
+// kelompok tetap terlihat sebagai keluarga warna yang sama, tapi masih bisa dibedakan.
+function shadeColor(hex, t){
+  let c = hex.replace('#','');
+  if(c.length===3) c = c.split('').map(x=>x+x).join('');
+  const num = parseInt(c,16);
+  let r = (num>>16)&255, g=(num>>8)&255, b=num&255;
+  const mix = t>=0 ? 255 : 0;
+  const amt = Math.abs(t);
+  r = Math.round(r + (mix-r)*amt);
+  g = Math.round(g + (mix-g)*amt);
+  b = Math.round(b + (mix-b)*amt);
+  return '#' + [r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+// Warna tiap kategori diturunkan dari warna kelompoknya (bukan palet independen per-baris),
+// supaya konsisten dengan garis warna di tabel Section 1 & 3.
+function categoryColor(row, indexWithinGroup, groupSize){
+  const base = groupOf(row.group).color;
+  if(groupSize<=1) return base;
+  // sebar variasi shade dari -0.35 (lebih gelap) sampai +0.35 (lebih terang) di antara anggota kelompok
+  const t = -0.35 + (0.7 * indexWithinGroup/(groupSize-1));
+  return shadeColor(base, t);
+}
+function buildCategoryColors(){
+  const countPerGroup = {};
+  data.forEach(row=>{ countPerGroup[row.group] = (countPerGroup[row.group]||0)+1; });
+  const seenPerGroup = {};
+  return data.map(row=>{
+    const idx = seenPerGroup[row.group] || 0;
+    seenPerGroup[row.group] = idx+1;
+    return categoryColor(row, idx, countPerGroup[row.group]);
+  });
+}
+
 let stackChart, cumChart;
 function updateCharts(monthTotals){
   const monthLabels = MONTHS.map(m=>m.short);
   const ctx1 = document.getElementById('stackChart');
+  const colors = buildCategoryColors();
   const datasets = data.map((row,i)=>({
     label: row.label,
     data: MONTHS.map(m=>row.target*(row.w[m.key]||0)),
-    backgroundColor: GROUP_PALETTE[i % GROUP_PALETTE.length],
+    backgroundColor: colors[i],
     stack:'s'
   }));
   if(stackChart) stackChart.destroy();
@@ -884,7 +1106,7 @@ function updateCharts(monthTotals){
     }
   });
   document.getElementById('barLegend').innerHTML = data.map((row,i)=>
-    `<span><span class="swatch" style="background:${GROUP_PALETTE[i % GROUP_PALETTE.length]}"></span>${row.label}</span>`).join('');
+    `<span><span class="swatch" style="background:${colors[i]}"></span>${row.label}</span>`).join('');
 
   const cum = []; let running=0;
   (monthTotals||[]).forEach(v=>{running+=v; cum.push(running);});
@@ -906,6 +1128,12 @@ function updateCharts(monthTotals){
 
 // ---------- CSV / backup ----------
 function downloadCSV(){
+  if(dirty) applyInputChanges(); // terapkan dulu perubahan Potensi/Target/Bobot yang belum disubmit
+  const issues = weightIssues();
+  if(issues.length){
+    const names = issues.map(r=>r.label).join(', ');
+    if(!confirm(`Total% bobot bulanan belum 100% untuk: ${names}.\n\nAngka forecast bulanan di CSV ini bisa tidak akurat. Tetap unduh?`)) return;
+  }
   let rows = [['Kategori','Kelompok','Potensi','Target', ...MONTHS.map(m=>m.short),'Total Target', ...MONTHS.map(m=>'Realisasi '+m.short),'Total Realisasi','% Capaian']];
   data.forEach(row=>{
     let rowTotal=0;
@@ -936,7 +1164,8 @@ function toggleBackupBox(){
   const box = document.getElementById('backupBox');
   box.style.display = box.style.display === 'none' ? 'block' : 'none';
 }function copyBackup(){
-  const payload = JSON.stringify({YEAR, MONTHS, GROUPS, data, strategy, actions, monthCounter, catCounter});
+  if(dirty) applyInputChanges(); // terapkan dulu perubahan Potensi/Target/Bobot yang belum disubmit
+  const payload = JSON.stringify({YEAR, MONTHS, GROUPS, data, strategy, actions, monthCounter, catCounter, CAPAIAN});
   const ta = document.getElementById('backupText');
   ta.value = payload;
   ta.style.display = 'block';
@@ -944,6 +1173,7 @@ function toggleBackupBox(){
   try{ document.execCommand('copy'); }catch(err){}
 }
 function applyBackup(){
+  if(!guardDirty('Ada perubahan Potensi/Target/Bobot yang belum diterapkan akan hilang jika backup dipulihkan sekarang. Lanjutkan?')) return;
   const ta = document.getElementById('backupText');
   try{
     const p = JSON.parse(ta.value);
@@ -956,8 +1186,11 @@ function applyBackup(){
     actions = p.actions || {};
     monthCounter = p.monthCounter || MONTHS.length;
     catCounter = p.catCounter || data.length;
+    CAPAIAN = p.CAPAIAN || CAPAIAN;
     activeMonth = MONTHS[0] ? MONTHS[0].key : null;
     document.getElementById('yearInput').value = YEAR;
+    document.getElementById('capaianInput').value = CAPAIAN;
+    clearDirty();
     render();
     alert('Data berhasil dipulihkan dari backup.');
   }catch(err){
@@ -967,8 +1200,37 @@ function applyBackup(){
 
 // ---------- Sinkronisasi Google Sheet (via Apps Script Web App) ----------
 let sheetUrl = '';
-function currentPayload(){
-  return JSON.stringify({YEAR, MONTHS, GROUPS, data, strategy, actions, monthCounter, catCounter});
+
+// Field koneksi (URL/token/nama) sengaja TIDAK ikut dalam data forecast yang disinkronkan —
+// hanya disimpan lokal di browser masing-masing orang lewat localStorage.
+function loadConnectionFields(){
+  try{
+    const savedUrl = localStorage.getItem('sf_sheetUrl');
+    const savedToken = localStorage.getItem('sf_sheetToken');
+    const savedName = localStorage.getItem('sf_userName');
+    if(savedUrl) document.getElementById('sheetUrlInput').value = savedUrl;
+    if(savedToken) document.getElementById('sheetTokenInput').value = savedToken;
+    if(savedName) document.getElementById('userNameInput').value = savedName;
+  }catch(err){ /* localStorage tidak tersedia (mode privat dsb) — abaikan */ }
+}
+function saveConnectionFields(){
+  try{
+    localStorage.setItem('sf_sheetUrl', document.getElementById('sheetUrlInput').value.trim());
+    localStorage.setItem('sf_sheetToken', document.getElementById('sheetTokenInput').value.trim());
+    localStorage.setItem('sf_userName', document.getElementById('userNameInput').value.trim());
+  }catch(err){ /* abaikan */ }
+}
+
+// Cek apakah ada baris dengan Total% bobot bulanan meleset dari 100% (toleransi 0.5%).
+function weightIssues(){
+  return data.filter(row=>{
+    const sum = MONTHS.reduce((a,m)=>a+(row.w[m.key]||0),0);
+    return Math.abs(sum-1) > 0.005;
+  });
+}
+
+function currentPayload(token, userName){
+  return JSON.stringify({YEAR, MONTHS, GROUPS, data, strategy, actions, monthCounter, catCounter, CAPAIAN, _token: token, _updatedBy: userName});
 }
 function applyPayload(p){
   if(!p.data || !p.MONTHS || !p.GROUPS) throw new Error('format data tidak lengkap');
@@ -976,63 +1238,103 @@ function applyPayload(p){
   MONTHS = p.MONTHS;
   GROUPS = p.GROUPS;
   data = p.data;
+  data.forEach(row=>{ if(typeof row.potensiManual==='undefined') row.potensiManual = false; }); // jaga kompatibilitas data lama
   strategy = p.strategy || {};
   actions = p.actions || {};
   monthCounter = p.monthCounter || MONTHS.length;
   catCounter = p.catCounter || data.length;
+  CAPAIAN = p.CAPAIAN || CAPAIAN;
   activeMonth = MONTHS[0] ? MONTHS[0].key : null;
   document.getElementById('yearInput').value = YEAR;
+  document.getElementById('capaianInput').value = CAPAIAN;
   render();
+}
+function showSheetMeta(lastUpdated, updatedBy){
+  const metaEl = document.getElementById('sheetMeta');
+  if(lastUpdated){
+    metaEl.textContent = `Terakhir disimpan oleh ${updatedBy || '(tanpa nama)'} — ${new Date(lastUpdated).toLocaleString('id-ID')}`;
+  } else {
+    metaEl.textContent = '';
+  }
 }
 async function saveToSheet(){
   sheetUrl = document.getElementById('sheetUrlInput').value.trim();
+  const token = document.getElementById('sheetTokenInput').value.trim();
+  const userName = document.getElementById('userNameInput').value.trim();
   const statusEl = document.getElementById('sheetStatus');
   if(!sheetUrl){ statusEl.textContent = 'Isi dulu URL Web App Apps Script (lihat PANDUAN_SETUP.md).'; return; }
+  if(!token){ statusEl.textContent = 'Isi dulu token akses (lihat ACCESS_TOKEN di Code.gs).'; return; }
+
+  if(dirty) applyInputChanges(); // terapkan dulu perubahan Potensi/Target/Bobot yang belum disubmit
+
+  const issues = weightIssues();
+  if(issues.length){
+    const names = issues.map(r=>r.label).join(', ');
+    if(!confirm(`Total% bobot bulanan belum 100% untuk: ${names}.\n\nForecast bulanan untuk kategori ini bisa tidak akurat. Tetap simpan ke Sheet?`)) {
+      statusEl.textContent = 'Penyimpanan dibatalkan — perbaiki Total% dulu di Section 1.';
+      return;
+    }
+  }
+
+  saveConnectionFields();
   statusEl.textContent = 'Menyimpan ke Google Sheet...';
   try{
     const res = await fetch(sheetUrl, {
       method:'POST',
       headers:{'Content-Type':'text/plain;charset=utf-8'}, // hindari CORS preflight ke Apps Script
-      body: currentPayload()
+      body: currentPayload(token, userName)
     });
     const json = await res.json();
     if(json.ok){
       statusEl.textContent = 'Tersimpan ke Google Sheet — ' + new Date().toLocaleString('id-ID');
+      showSheetMeta(json.last_updated, json.updated_by);
     } else {
       statusEl.textContent = 'Gagal menyimpan: ' + (json.error || 'respons tidak dikenali dari Apps Script.');
     }
   }catch(err){
-    statusEl.textContent = 'Gagal menyimpan (cek URL & izin akses "Anyone"): ' + err.message;
+    statusEl.textContent = 'Gagal menyimpan (cek URL, token, & izin akses "Anyone"): ' + err.message;
   }
 }
 async function loadFromSheet(){
+  if(!guardDirty('Ada perubahan Potensi/Target/Bobot yang belum diterapkan akan hilang jika data dimuat dari Sheet sekarang. Lanjutkan?')) return;
   sheetUrl = document.getElementById('sheetUrlInput').value.trim();
+  const token = document.getElementById('sheetTokenInput').value.trim();
   const statusEl = document.getElementById('sheetStatus');
   if(!sheetUrl){ statusEl.textContent = 'Isi dulu URL Web App Apps Script (lihat PANDUAN_SETUP.md).'; return; }
+  if(!token){ statusEl.textContent = 'Isi dulu token akses (lihat ACCESS_TOKEN di Code.gs).'; return; }
+  saveConnectionFields();
   statusEl.textContent = 'Memuat dari Google Sheet...';
   try{
-    const res = await fetch(sheetUrl, {method:'GET'});
-    const p = await res.json();
-    if(!p.data){ statusEl.textContent = 'Sheet ini belum punya data tersimpan — klik "Simpan ke Sheet" dulu.'; return; }
-    applyPayload(p);
+    const res = await fetch(sheetUrl + '?token=' + encodeURIComponent(token), {method:'GET'});
+    const json = await res.json();
+    if(!json.ok){ statusEl.textContent = 'Gagal memuat: ' + (json.error || 'respons tidak dikenali dari Apps Script.'); return; }
+    if(!json.state || !json.state.data){ statusEl.textContent = 'Sheet ini belum punya data tersimpan — klik "Simpan ke Sheet" dulu.'; return; }
+    applyPayload(json.state);
+    clearDirty();
     statusEl.textContent = 'Dimuat dari Google Sheet — ' + new Date().toLocaleString('id-ID');
+    showSheetMeta(json.last_updated, json.updated_by);
   }catch(err){
-    statusEl.textContent = 'Gagal memuat (cek URL & izin akses "Anyone"): ' + err.message;
+    statusEl.textContent = 'Gagal memuat (cek URL, token, & izin akses "Anyone"): ' + err.message;
   }
 }
 function initSheetUrlFromQuery(){
+  loadConnectionFields();
   const params = new URLSearchParams(window.location.search);
   const q = params.get('sheet');
   if(q){
     document.getElementById('sheetUrlInput').value = q;
     sheetUrl = q;
+  }
+  // Auto-muat kalau URL & token sudah pernah tersimpan/terisi, supaya semua orang
+  // default melihat data terbaru saat membuka halaman.
+  if(document.getElementById('sheetUrlInput').value.trim() && document.getElementById('sheetTokenInput').value.trim()){
     loadFromSheet();
   }
 }
 
 function renderFooterNote(){
-  document.getElementById('footerNote').innerHTML = `Sumber awal: lampiran <em>SF_Semester_II.xlsx</em> untuk periode Juli&ndash;Desember 2026. Aplikasi ini sekarang bersifat generik &mdash; kategori, kelompok, daftar bulan, dan tahun bisa diedit/ditambah lewat Section 0 (Pengaturan) dan Section 1, sehingga bisa dipakai lagi untuk semester atau tahun berikutnya tanpa mengedit kode.<br><br>
-    <b>Tentang penyimpanan data.</b> Halaman ini tidak menyimpan apa pun otomatis di browser &mdash; semua isian hanya hidup selama tab dibuka. Gunakan <b>Backup / pulihkan data</b> untuk menyalin seluruh isian (termasuk kategori/kelompok/bulan/tahun kustom) sebagai teks yang bisa disimpan di luar, lalu ditempel kembali di sesi berikutnya. Untuk arsip resmi, gunakan <b>Unduh CSV forecast</b>.`;
+  document.getElementById('footerNote').innerHTML = `Sumber awal: lampiran <em>SF_Semester_II.xlsx</em> untuk periode Juli&ndash;Desember 2026. Aplikasi ini sekarang bersifat generik &mdash; kategori, kelompok, daftar bulan, tahun, dan rasio capaian (untuk hitung Potensi otomatis) bisa diedit/ditambah lewat Section 0 (Pengaturan) dan Section 1, sehingga bisa dipakai lagi untuk semester atau tahun berikutnya tanpa mengedit kode.<br><br>
+    <b>Tentang penyimpanan data.</b> Halaman ini tidak menyimpan apa pun otomatis di browser &mdash; semua isian hanya hidup selama tab dibuka, kecuali URL/token/nama Anda di kotak Sinkronisasi (tersimpan lokal di perangkat ini saja). Gunakan <b>Sinkronisasi Google Sheet</b> untuk menyimpan &amp; menarik data dari perangkat lain &mdash; setiap penyimpanan tercatat siapa &amp; kapan, dan versi sebelumnya tetap tersimpan di sheet <em>History</em> sebagai jaring pengaman. <b>Backup / pulihkan data</b> tetap tersedia sebagai cadangan manual, dan <b>Unduh CSV forecast</b> untuk arsip resmi.`;
 }
 
 function render(){
@@ -1048,6 +1350,7 @@ function render(){
   renderFooterNote();
 }
 document.getElementById('yearInput').value = YEAR;
+document.getElementById('capaianInput').value = CAPAIAN;
 render();
 initSheetUrlFromQuery();
 </script>
