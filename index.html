@@ -356,7 +356,7 @@
       <table id="prospectTable">
         <thead>
           <tr>
-            <th class="lefth">No</th><th class="lefth">Prioritas</th><th class="lefth">Perusahaan</th><th class="lefth">Sektor</th><th class="lefth">Kota/Kab</th><th class="lefth">Program yang cocok</th><th class="lefth">Status awal</th><th>Tgl kirim proposal</th><th class="lefth">Status kirim</th><th class="lefth">Catatan</th>
+            <th class="lefth">No</th><th class="lefth">Prioritas</th><th class="lefth">Perusahaan</th><th class="lefth">Sektor</th><th class="lefth">Kota/Kab</th><th class="lefth">Program yang cocok</th><th>Tgl kirim proposal</th><th class="lefth">Status kirim</th><th class="lefth">Catatan</th>
           </tr>
         </thead>
         <tbody id="prospectBody"></tbody>
@@ -1431,7 +1431,7 @@ function renderProspects(){
   const tbody = document.getElementById('prospectBody');
   const rows = filteredProspects();
   if(rows.length===0){
-    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:var(--ink-mute);padding:1.2rem;">Tidak ada perusahaan yang cocok dengan pencarian/filter.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--ink-mute);padding:1.2rem;">Tidak ada perusahaan yang cocok dengan pencarian/filter.</td></tr>`;
     return;
   }
   tbody.innerHTML = rows.map(p=>`
@@ -1442,7 +1442,6 @@ function renderProspects(){
       <td class="leftc">${escapeHtml(p.sektor)}</td>
       <td class="leftc">${escapeHtml(p.kota)||'<span style="color:var(--ink-mute);">-</span>'}</td>
       <td class="leftc" style="max-width:220px;font-size:11.5px;color:var(--ink-mute);">${escapeHtml(p.program)}</td>
-      <td class="leftc" style="font-size:11.5px;">${escapeHtml(p.status)}</td>
       <td><input type="date" class="prospect-date" data-no="${p.no}" value="${p.tglKirim}"></td>
       <td class="leftc">
         <select class="group-select prospect-statuskirim" data-no="${p.no}">
@@ -1482,9 +1481,9 @@ function escapeHtml(s){
   return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 function downloadProspectCSV(){
-  const rows = [['No','Prioritas','Perusahaan','Sektor','Kota/Kabupaten','Program yang Cocok','Status Awal','Tanggal Pengiriman Proposal','Status Kirim','Catatan']];
+  const rows = [['No','Prioritas','Perusahaan','Sektor','Kota/Kabupaten','Program yang Cocok','Tanggal Pengiriman Proposal','Status Kirim','Catatan']];
   filteredProspects().forEach(p=>{
-    rows.push([p.no, p.prioritas, p.perusahaan, p.sektor, p.kota, p.program, p.status, p.tglKirim, STATUS_KIRIM_LABEL[p.statusKirim]||p.statusKirim, p.catatan]);
+    rows.push([p.no, p.prioritas, p.perusahaan, p.sektor, p.kota, p.program, p.tglKirim, STATUS_KIRIM_LABEL[p.statusKirim]||p.statusKirim, p.catatan]);
   });
   const csv = rows.map(r=>r.map(v=>`"${String(v==null?'':v).replace(/"/g,'""')}"`).join(';')).join('\n');
   const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
