@@ -565,6 +565,15 @@ let activeMonth = MONTHS[0].key;
 let catCounter = data.length;
 
 const rupiah = n => 'Rp' + Math.round(n).toLocaleString('id-ID');
+// Kebalikan dari toLocaleString('id-ID'): format Indonesia pakai TITIK sebagai pemisah ribuan
+// (mis. "577.000.000"), bukan desimal — jadi titik ikut dibuang, bukan dipertahankan seperti
+// parseFloat biasa (yang salah berhenti di titik kedua dan membaca "577.000.000" jadi 577).
+function parseRupiahInput(str){
+  if(str==null) return 0;
+  const cleaned = String(str).replace(/[^0-9-]/g, '');
+  const v = parseFloat(cleaned);
+  return isNaN(v) ? 0 : v;
+}
 const ACTION_TYPES = ['Proposal','Follow-up WA','Galang Dana','Event'];
 
 function groupOf(id){ return GROUPS.find(g=>g.id===id) || GROUPS[0]; }
@@ -763,13 +772,13 @@ function applyInputChanges(){
 
     const targetInput = tr.querySelector('input[data-type="target"]');
     if(targetInput){
-      let tv = parseFloat(targetInput.value.replace(/[^0-9.-]/g,'')); if(isNaN(tv)) tv = 0;
+      let tv = parseRupiahInput(targetInput.value); if(isNaN(tv)) tv = 0;
       row.target = tv;
     }
 
     const potInput = tr.querySelector('input[data-type="potensi"]');
     if(potInput){
-      let pv = parseFloat(potInput.value.replace(/[^0-9.-]/g,'')); if(isNaN(pv)) pv = 0;
+      let pv = parseRupiahInput(potInput.value); if(isNaN(pv)) pv = 0;
       if(potInput.dataset.manual === 'true'){
         row.potensi = pv; row.potensiManual = true; row.potensiAsumsi = false;
       } else if(row.group === 'reguler'){
@@ -1077,7 +1086,7 @@ function buildRealisasi(){
   tbody.querySelectorAll('.realisasi-input').forEach(inp=>{
     inp.addEventListener('change', e=>{
       const ch = realisasiChannels.find(c=>c.key===e.target.dataset.key);
-      let v = parseFloat(e.target.value.replace(/[^0-9.-]/g,'')); if(isNaN(v)) v = 0;
+      let v = parseRupiahInput(e.target.value); if(isNaN(v)) v = 0;
       ch.realisasi[e.target.dataset.mkey] = v;
       buildRealisasi();
       updateCharts(lastMonthTotals); // refresh grafik kumulatif Target vs Realisasi
