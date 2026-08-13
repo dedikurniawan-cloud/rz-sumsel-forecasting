@@ -287,6 +287,17 @@
   <section>
     <h2>3. Realisasi vs target bulanan</h2>
     <div class="section-note">Isi nominal yang benar-benar sudah cair/diterima per kategori per bulan. Persentase capaian dihitung otomatis dan diberi warna: merah &lt;70%, oranye 70&ndash;99%, hijau &ge;100%.</div>
+    <div class="metrics" id="evalMetrics" style="margin-bottom:1rem;"></div>
+    <div class="grid2" id="evalInsightRow" style="margin-bottom:1.2rem;">
+      <div class="chart-card">
+        <div class="subhead" style="margin-top:0;">Kategori dengan capaian tertinggi</div>
+        <div id="evalTopList"></div>
+      </div>
+      <div class="chart-card">
+        <div class="subhead" style="margin-top:0;">Kategori perlu perhatian (capaian terendah)</div>
+        <div id="evalBottomList"></div>
+      </div>
+    </div>
     <div class="scrollhint">&#8592; Geser tabel ke samping untuk melihat kolom lainnya &#8594;</div>
     <div class="tablewrap">
       <table id="realisasiTable">
@@ -318,8 +329,9 @@
         <div style="position:relative;height:340px;"><canvas id="stackChart" role="img" aria-label="Grafik batang forecast bulanan per kategori"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="legend"><span><span class="swatch" style="background:#E8720C;"></span>Forecast kumulatif</span></div>
-        <div style="position:relative;height:340px;"><canvas id="cumChart" role="img" aria-label="Grafik kumulatif forecast total"></canvas></div>
+        <div class="legend"><span><span class="swatch" style="background:#E8720C;"></span>Target kumulatif</span><span><span class="swatch" style="background:#3E7A3E;"></span>Realisasi kumulatif</span></div>
+        <div style="position:relative;height:340px;"><canvas id="cumChart" role="img" aria-label="Grafik kumulatif Target vs Realisasi"></canvas></div>
+        <div class="section-note" style="margin:.6rem 0 0;">Kalau garis hijau (Realisasi) berada di bawah garis oranye (Target), berarti capaian sedang tertinggal &mdash; gap-nya bisa dilihat langsung dari jarak antar garis di tiap bulan.</div>
       </div>
     </div>
   </section>
@@ -999,8 +1011,10 @@ function buildRealisasi(){
 
   const tbody = document.getElementById('realisasiBody');
   tbody.innerHTML = '';
-  const monthTotals = new Array(MONTHS.length).fill(0);
+  const monthRealisasi = new Array(MONTHS.length).fill(0);
+  const monthTarget = new Array(MONTHS.length).fill(0);
   let grandRealisasi = 0, grandTarget = 0;
+  const rowStats = []; // untuk ranking capaian per kategori
 
   data.forEach((row)=>{
     const g = groupOf(row.group);
@@ -1009,9 +1023,9 @@ function buildRealisasi(){
     let rowRealisasi = 0, rowTarget = 0;
     MONTHS.forEach((m,i)=>{
       const t = row.target * (row.w[m.key]||0);
-      rowTarget += t;
+      rowTarget += t; monthTarget[i] += t;
       const r = row.realisasi[m.key] || 0;
-      rowRealisasi += r; monthTotals[i] += r;
+      rowRealisasi += r; monthRealisasi[i] += r;
       cells += `<td><input class="realisasi-input" type="text" value="${Math.round(r).toLocaleString('id-ID')}" data-key="${row.key}" data-mkey="${m.key}"></td>`;
     });
     grandRealisasi += rowRealisasi; grandTarget += rowTarget;
@@ -1021,14 +1035,26 @@ function buildRealisasi(){
     cells += `<td><span class="achieve-badge ${cls}">${pct.toFixed(0)}%</span></td>`;
     tr.innerHTML = cells;
     tbody.appendChild(tr);
+    if(rowTarget > 0) rowStats.push({label:row.label, group:g, pct, rowRealisasi, rowTarget, gap: rowRealisasi-rowTarget});
   });
 
   const grandPct = grandTarget>0 ? (grandRealisasi/grandTarget*100) : 0;
   const grandCls = grandPct>=100?'high':(grandPct>=70?'mid':'low');
-  let footCells = `<td class="leftc">Total</td><td></td>`;
-  monthTotals.forEach(v=>footCells += `<td>${rupiah(v)}</td>`);
+  let footCells = `<td class="leftc">Total (Rp)</td><td></td>`;
+  monthRealisasi.forEach(v=>footCells += `<td>${rupiah(v)}</td>`);
   footCells += `<td>${rupiah(grandRealisasi)}</td><td><span class="achieve-badge ${grandCls}">${grandPct.toFixed(0)}%</span></td>`;
-  document.getElementById('realisasiFoot').innerHTML = `<tr>${footCells}</tr>`;
+
+  // Baris tambahan: % capaian per bulan (agregat semua kategori) — ini bagian yang tadinya belum ada,
+  // supaya kelihatan bulan mana yang realisasinya jauh dari target, bukan cuma total semester.
+  let pctFootCells = `<td class="leftc">% capaian per bulan</td><td></td>`;
+  monthTarget.forEach((t,i)=>{
+    const p = t>0 ? (monthRealisasi[i]/t*100) : 0;
+    const c = p>=100?'high':(p>=70?'mid':'low');
+    pctFootCells += `<td><span class="achieve-badge ${c}">${p.toFixed(0)}%</span></td>`;
+  });
+  pctFootCells += `<td></td><td></td>`;
+
+  document.getElementById('realisasiFoot').innerHTML = `<tr>${footCells}</tr><tr>${pctFootCells}</tr>`;
 
   tbody.querySelectorAll('.realisasi-input').forEach(inp=>{
     inp.addEventListener('change', e=>{
@@ -1036,12 +1062,50 @@ function buildRealisasi(){
       let v = parseFloat(e.target.value.replace(/[^0-9.-]/g,'')); if(isNaN(v)) v = 0;
       row.realisasi[e.target.dataset.mkey] = v;
       buildRealisasi();
+      updateCharts(lastMonthTotals); // refresh grafik kumulatif Target vs Realisasi
     });
   });
+
+  renderEvalMetrics(grandRealisasi, grandTarget, grandPct, rowStats);
+  renderEvalInsights(rowStats);
+  lastMonthRealisasi = monthRealisasi;
+  lastMonthTarget = monthTarget;
+}
+
+function renderEvalMetrics(grandRealisasi, grandTarget, grandPct, rowStats){
+  const gap = grandRealisasi - grandTarget;
+  const gapCls = gap>=0 ? '' : 'dark';
+  const aboveCount = rowStats.filter(r=>r.pct>=100).length;
+  const cards = [
+    {label:'Total Realisasi (s.d. saat ini)', value: rupiah(grandRealisasi), foot:`dari total target ${rupiah(grandTarget)}`, cls:'dark'},
+    {label:'Capaian keseluruhan', value: grandPct.toFixed(0)+'%', foot: grandPct>=100?'Di atas target':'Di bawah target', cls: grandPct>=100?'':'dark'},
+    {label:'Gap terhadap target', value: (gap>=0?'+':'') + rupiah(gap), foot: gap>=0?'Surplus dari target':'Kekurangan dari target', cls: gapCls},
+    {label:'Kategori sudah capai target', value: `${aboveCount} / ${rowStats.length}`, foot:'kategori dengan capaian &ge;100%', cls:''},
+  ];
+  document.getElementById('evalMetrics').innerHTML = cards.map(c=>`
+    <div class="metric"><div class="label">${c.label}</div><div class="value ${c.cls}">${c.value}</div><div class="foot">${c.foot}</div></div>
+  `).join('');
+}
+
+function renderEvalInsights(rowStats){
+  const sorted = [...rowStats].sort((a,b)=>b.pct-a.pct);
+  const top = sorted.slice(0,3);
+  const bottom = sorted.slice(-3).reverse();
+  const renderList = (list)=> list.length ? list.map(r=>{
+    const cls = r.pct>=100?'high':(r.pct>=70?'mid':'low');
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;border-bottom:1px solid var(--line);">
+      <div><div style="font-weight:600;font-size:13px;">${r.label}</div><div style="font-size:11.5px;color:var(--ink-mute);">${rupiah(r.rowRealisasi)} dari ${rupiah(r.rowTarget)}</div></div>
+      <span class="achieve-badge ${cls}">${r.pct.toFixed(0)}%</span>
+    </div>`;
+  }).join('') : `<div style="font-size:12.5px;color:var(--ink-mute);padding:.4rem 0;">Belum ada kategori dengan target &gt; 0.</div>`;
+  document.getElementById('evalTopList').innerHTML = renderList(top);
+  document.getElementById('evalBottomList').innerHTML = renderList(bottom);
 }
 
 // ---------- Section 4/5: forecast output + charts ----------
 let lastMonthTotals = [];
+let lastMonthRealisasi = [];
+let lastMonthTarget = [];
 function renderOutputsAndCharts(){
   const headRow = document.getElementById('outputHeadRow');
   let headHtml = '<th class="lefth">Kategori</th><th class="lefth">Kelompok</th>';
@@ -1152,19 +1216,27 @@ function updateCharts(monthTotals){
   document.getElementById('barLegend').innerHTML = data.map((row,i)=>
     `<span><span class="swatch" style="background:${colors[i]}"></span>${row.label}</span>`).join('');
 
-  const cum = []; let running=0;
-  (monthTotals||[]).forEach(v=>{running+=v; cum.push(running);});
+  const cumTarget = []; let runningT=0;
+  (monthTotals||[]).forEach(v=>{runningT+=v; cumTarget.push(runningT);});
+  const cumRealisasi = []; let runningR=0;
+  (lastMonthRealisasi||[]).forEach(v=>{runningR+=v; cumRealisasi.push(runningR);});
   const ctx2 = document.getElementById('cumChart');
   if(cumChart) cumChart.destroy();
   cumChart = new Chart(ctx2, {
     type:'line',
-    data:{labels:monthLabels, datasets:[{
-      label:'Kumulatif', data:cum, borderColor:'#E8720C', backgroundColor:'rgba(232,114,12,0.08)',
-      fill:true, tension:.3, pointRadius:4, pointBackgroundColor:'#E8720C'
-    }]},
+    data:{labels:monthLabels, datasets:[
+      {
+        label:'Target kumulatif', data:cumTarget, borderColor:'#E8720C', backgroundColor:'rgba(232,114,12,0.08)',
+        fill:true, tension:.3, pointRadius:4, pointBackgroundColor:'#E8720C', borderDash:[5,3]
+      },
+      {
+        label:'Realisasi kumulatif', data:cumRealisasi, borderColor:'#3E7A3E', backgroundColor:'rgba(62,122,62,0.10)',
+        fill:true, tension:.3, pointRadius:4, pointBackgroundColor:'#3E7A3E'
+      }
+    ]},
     options:{
       responsive:true, maintainAspectRatio:false,
-      plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>rupiah(c.raw)}}},
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>c.dataset.label+': '+rupiah(c.raw)}}},
       scales:{ x:{grid:{display:false}}, y:{ticks:{callback:v=>'Rp'+(v/1e6).toFixed(0)+'jt'}, grid:{color:'#F0DCC8'}} }
     }
   });
